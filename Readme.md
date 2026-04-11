@@ -18,7 +18,7 @@ You can verify this by reading index.html. It's the entire app in one file, comm
 ## Why no accounts?
 
 There is no server, no database, no login. That means there is
-nothing to hack, nothing to leak, and I personally see no reason to force others to trust me, or anyone else, with their information.
+nothing to hack, nothing to leak; and I personally see no reason to ask people to trust me, or anyone else, with their information.
 
 ## Backup and data transfer
 
