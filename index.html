@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Radar</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Time Radar">
+<meta name="theme-color" content="#f5f5f0">
+<link rel="manifest" href="data:application/json,{}">
+<!-- Everything between these style tags controls how the app looks: colours, sizes, spacing. -->
+<style>
+/* These are the colour values used throughout the app. Dark mode swaps them out below. */
+:root{
+  --bg:#f5f5f0;
+  --bg-card:#fff;
+  --text:#2c2c2a;
+  --text-mid:#5f5e5a;
+  --text-muted:#888780;
+  --text-faint:#b4b2a9;
+  --text-footer:#c4c2b9;
+  --border:#e8e7e2;
+  --border-mid:#d3d1c7;
+  --hover:#f1efe8;
+  --hover-dark:#e8e7e2;
+  --add-bg:#E6F1FB;
+  --add-text:#0C447C;
+  --done-text:#3B6D11;
+  --done-border:#97C459;
+  --done-hover:#EAF3DE;
+  --input-bg:#fff;
+  --input-focus:#85B7EB;
+  --shadow:rgba(0,0,0,.08);
+  --overlay:rgba(0,0,0,0.35);
+}
+body.dark{
+  --bg:#1a1a1a;
+  --bg-card:#252525;
+  --text:#e0e0dc;
+  --text-mid:#a0a09a;
+  --text-muted:#7a7a74;
+  --text-faint:#555550;
+  --text-footer:#444440;
+  --border:#333330;
+  --border-mid:#444440;
+  --hover:#2e2e2a;
+  --hover-dark:#383834;
+  --add-bg:#1a2e42;
+  --add-text:#85B7EB;
+  --done-text:#97C459;
+  --done-border:#4a6a20;
+  --done-hover:#2a3518;
+  --input-bg:#2a2a26;
+  --input-focus:#4a8abf;
+  --shadow:rgba(0,0,0,.3);
+  --overlay:rgba(0,0,0,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;padding:1.25rem 1rem;transition:background .2s,color .2s}
+.wrap{max-width:540px;margin:0 auto}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.hdr h1{font-size:20px;font-weight:600;letter-spacing:-.3px}
+.hdr-btns{display:flex;gap:6px;align-items:stretch}
+.word-btn{background:transparent;border:1px solid var(--border-mid);border-radius:8px;padding:6px 12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-mid);font-size:11px;line-height:1.3;text-align:center}
+.word-btn:hover{background:var(--hover-dark)}
+.add-btn{background:var(--add-bg);color:var(--add-text);border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
+.add-btn:hover{opacity:.85}
+.legend{display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:var(--text-muted);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:#97C459}
+.dot.due-soon{background:#EF9F27}
+.dot.overdue{background:#E24B4A}
+.task{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;transition:background .2s}
+.task.due-soon{border-left:3px solid #EF9F27}
+.task.overdue{border-left:3px solid #E24B4A}
+.task.ok{border-left:3px solid #97C459}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px;font-weight:500}
+.task-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.task-actions{display:flex;gap:5px;flex-shrink:0}
+.task-actions button{background:transparent;border:1px solid var(--border-mid);border-radius:7px;padding:4px 9px;font-size:11px;cursor:pointer;color:var(--text-mid)}
+.task-actions button:hover{background:var(--hover)}
+.task-actions .done-btn{color:var(--done-text);border-color:var(--done-border)}
+.task-actions .done-btn:hover{background:var(--done-hover)}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--text-faint);font-size:14px;line-height:1.6}
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--overlay);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;z-index:10}
+.modal{background:var(--bg-card);border-radius:12px;padding:1.25rem;width:92%;max-width:380px;border:1px solid var(--border)}
+.modal h3{font-size:16px;font-weight:500;margin-bottom:10px}
+.modal label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:4px;margin-top:10px}
+.modal input{width:100%;font-size:14px;padding:8px 10px;border:1px solid var(--border-mid);border-radius:8px;background:var(--input-bg);color:var(--text)}
+.modal input:focus{outline:none;border-color:var(--input-focus)}
+.modal-btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.modal-btns button{border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer}
+.cancel-btn{background:transparent;border:1px solid var(--border-mid);color:var(--text-mid)}
+.footer{text-align:center;margin-top:1.5rem;font-size:10px;color:var(--text-footer)}
+.menu{position:absolute;right:0;top:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:4px;min-width:160px;z-index:20;box-shadow:0 4px 12px var(--shadow)}
+.menu button{display:block;width:100%;text-align:left;background:none;border:none;padding:8px 12px;font-size:13px;color:var(--text);cursor:pointer;border-radius:6px}
+.menu button:hover{background:var(--hover)}
+.menu-wrap{position:relative;display:flex}
+input[type="file"]{display:none}
+@media(max-width:400px){
+  .task{flex-wrap:wrap}
+  .task-actions{width:100%;justify-content:flex-end}
+}
+</style>
+</head>
+<body>
+<!-- This is where the app's tasks appear. -->
+<div class="wrap" id="app"></div>
+
+<script>
+// This is the name used to store your tasks in the browser. Nothing is sent anywhere.
+const STORAGE_KEY='timeRadar_v1';
+
+// These are just starter tasks so the app isn't empty on first use.
+const DEFAULT_TASKS=[
+  {id:1,name:"Mow the lawn",freqDays:10,lastDone:Date.now()-8*86400000},
+  {id:2,name:"Mop kitchen floor",freqDays:5,lastDone:Date.now()-6*86400000},
+  {id:3,name:"Vacuum lounge",freqDays:4,lastDone:Date.now()-2*86400000},
+  {id:4,name:"Clean bathroom",freqDays:7,lastDone:Date.now()-7*86400000},
+  {id:5,name:"Wash sheets",freqDays:10,lastDone:Date.now()-4*86400000},
+  {id:6,name:"Wipe kitchen surfaces",freqDays:2,lastDone:Date.now()-1*86400000},
+  {id:7,name:"Backup Time Radar",freqDays:14,lastDone:Date.now()-14*86400000},
+];
+
+// Load any previously saved tasks, or use the defaults if there aren't any.
+let tasks=load();
+let nextId=tasks.reduce((m,t)=>Math.max(m,t.id),0)+1;
+let showModal=false,editId=null,showMenu=false;
+
+// Checks if you previously chose dark mode and applies it.
+let isDark=localStorage.getItem('timeRadar_dark')==='true';
+if(isDark)document.body.classList.add('dark');
+
+// Reads your saved tasks from the browser's storage.
+function load(){
+  try{const d=localStorage.getItem(STORAGE_KEY);if(d)return JSON.parse(d);}catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+}
+
+// Saves your current tasks to the browser's storage.
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks))}
+
+// Checks whether a task is overdue, due soon, or fine based on how long ago you did it.
+function status(t){
+  const ratio=(Date.now()-t.lastDone)/(t.freqDays*86400000);
+  if(ratio>=1.15)return'overdue';
+  if(ratio>=0.7)return'due-soon';
+  return'ok';
+}
+
+// Counts how many calendar days have passed since a task was last done.
+function daysAgo(ts){
+  const now=new Date(),then=new Date(ts);
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const thenDay=new Date(then.getFullYear(),then.getMonth(),then.getDate());
+  return Math.round((today-thenDay)/86400000);
+}
+
+// Turns a number of days into a friendly label like "daily" or "every 5 days".
+function freqLabel(d){
+  if(d===1)return'daily';if(d===7)return'weekly';if(d===14)return'fortnightly';
+  return'every '+d+' days';
+}
+
+// Sorts tasks so the most urgent ones appear at the top.
+function urgencySort(a,b){
+  const order={overdue:0,'due-soon':1,ok:2};
+  const sa=order[status(a)],sb=order[status(b)];
+  if(sa!==sb)return sa-sb;
+  return(Date.now()-b.lastDone)/b.freqDays-(Date.now()-a.lastDone)/a.freqDays;
+}
+
+// Makes sure task names display safely and can't accidentally break the page.
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+
+// Draws the entire screen: the task list, the legend, the menu, and the edit popup.
+function render(){
+  const sorted=[...tasks].sort(urgencySort);
+  const oc=sorted.filter(t=>status(t)==='overdue').length;
+  const sc=sorted.filter(t=>status(t)==='due-soon').length;
+
+  let h='<div class="hdr"><h1>Time Radar</h1><div class="hdr-btns">';
+  h+='<button class="add-btn" onclick="openAdd()">+ Add</button>';
+  h+='<button class="word-btn" onclick="toggleDark()">Dark Mode<br>Toggle</button>';
+  h+='<div class="menu-wrap"><button class="word-btn" onclick="toggleMenu(event)">Menu</button>';
+  if(showMenu){
+    h+='<div class="menu">';
+    h+='<button onclick="exportData()">Download backup</button>';
+    h+='<button onclick="triggerImport()">Restore from backup</button>';
+    h+='<button onclick="resetAll()">Reset to defaults</button>';
+    h+='</div>';
+  }
+  h+='</div></div></div>';
+
+  h+='<div class="legend"><div class="legend-item"><span class="dot overdue"></span> Overdue ('+oc+')</div><div class="legend-item"><span class="dot due-soon"></span> Due soon ('+sc+')</div><div class="legend-item"><span class="dot ok"></span> All good</div></div>';
+
+  if(!sorted.length)h+='<div class="empty">No tasks yet.<br>Tap "+ Add" to create one.</div>';
+  for(const t of sorted){
+    const s=status(t),da=daysAgo(t.lastDone);
+    const dayLabel=da===0?'today':da===1?'yesterday':da+' days ago';
+    h+='<div class="task '+s+'"><span class="dot '+s+'"></span><div class="task-info"><div class="task-name">'+esc(t.name)+'</div><div class="task-meta">'+freqLabel(t.freqDays)+' &middot; last done '+dayLabel+'</div></div><div class="task-actions"><button class="done-btn" onclick="markDone('+t.id+')">Done</button><button onclick="openEdit('+t.id+')">Edit</button><button onclick="remove('+t.id+')">X</button></div></div>';
+  }
+
+  if(showModal){
+    const et=editId?tasks.find(t=>t.id===editId):null;
+    h+='<div class="overlay" onclick="closeModal(event)"><div class="modal"><h3>'+(et?'Edit':'Add')+' task</h3>';
+    h+='<label>Task name</label><input id="m-name" value="'+(et?esc(et.name):'')+'" placeholder="e.g. Mop kitchen">';
+    h+='<label>How often (days)</label><input id="m-freq" type="number" min="1" value="'+(et?et.freqDays:7)+'">';
+    h+='<label>Last done (days ago)</label><input id="m-ago" type="number" min="0" value="'+(et?daysAgo(et.lastDone):0)+'">';
+    h+='<div class="modal-btns"><button class="cancel-btn" onclick="closeModal()">Cancel</button><button class="add-btn" onclick="saveTask()">Save</button></div></div></div>';
+  }
+
+  h+='<input type="file" id="import-file" accept=".json" onchange="importData(event)">';
+  h+='<div class="footer">Data is stored in this browser only.</div>';
+  document.getElementById('app').innerHTML=h;
+  if(showModal){const el=document.getElementById('m-name');if(el)el.focus();}
+}
+
+// Opens and closes the three-dot menu.
+function toggleMenu(e){e.stopPropagation();showMenu=!showMenu;render()}
+document.addEventListener('click',function(){if(showMenu){showMenu=false;render()}});
+
+// Switches between light and dark mode and remembers your choice.
+function toggleDark(){isDark=!isDark;document.body.classList.toggle('dark');localStorage.setItem('timeRadar_dark',isDark);render()}
+
+// Marks a task as done right now and saves.
+function markDone(id){const t=tasks.find(x=>x.id===id);if(t){t.lastDone=Date.now();save();render()}}
+
+// Removes a task after asking you to confirm.
+function remove(id){if(!confirm('Remove this task?'))return;tasks=tasks.filter(x=>x.id!==id);save();render()}
+
+// Opens the popup to add or edit a task.
+function openAdd(){showModal=true;editId=null;showMenu=false;render()}
+function openEdit(id){showModal=true;editId=id;showMenu=false;render()}
+function closeModal(e){if(e&&e.target!==e.currentTarget)return;showModal=false;editId=null;render()}
+
+// Saves a new or edited task.
+function saveTask(){
+  const name=document.getElementById('m-name').value.trim();
+  const freq=parseInt(document.getElementById('m-freq').value)||7;
+  const ago=parseInt(document.getElementById('m-ago').value)||0;
+  if(!name)return;
+  if(editId){
+    const t=tasks.find(x=>x.id===editId);
+    if(t){t.name=name;t.freqDays=freq;t.lastDone=Date.now()-ago*86400000;}
+  }else{
+    tasks.push({id:nextId++,name,freqDays:freq,lastDone:Date.now()-ago*86400000});
+  }
+  showModal=false;editId=null;save();render();
+}
+
+// Downloads all your tasks as a JSON file so you have a backup.
+function exportData(){
+  showMenu=false;
+  const blob=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='time-radar-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  render();
+}
+
+// Opens a file picker so you can load a previously saved backup.
+function triggerImport(){
+  showMenu=false;render();
+  document.getElementById('import-file').click();
+}
+
+// Reads the backup file and replaces your current tasks with it.
+function importData(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!Array.isArray(data)){alert('Invalid backup file.');return;}
+      if(!confirm('This will replace all current tasks with the backup. Continue?'))return;
+      tasks=data;
+      nextId=tasks.reduce((m,t)=>Math.max(m,t.id),0)+1;
+      save();render();
+    }catch(err){alert('Could not read file. Make sure it is a Time Radar backup.')}
+  };
+  reader.readAsText(file);
+}
+
+// Wipes everything and starts fresh with the example tasks.
+function resetAll(){
+  showMenu=false;
+  if(!confirm('Reset all tasks to defaults? Your current tasks will be lost.'))return;
+  tasks=JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  nextId=tasks.reduce((m,t)=>Math.max(m,t.id),0)+1;
+  save();render();
+}
+
+// Start the app.
+render();
+</script>
+</body>
+</html>
