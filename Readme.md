@@ -18,4 +18,5 @@ You can verify this by reading index.html — it's the entire app in one file.
 ## Backup
 
 Use Menu > Download backup to save your tasks as a JSON file.
+
 Use Menu > Restore from backup to load one.
