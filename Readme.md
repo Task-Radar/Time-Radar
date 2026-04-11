@@ -13,10 +13,16 @@ recurring tasks and shows you what's drifting using colour codes.
 
 Your data never leaves your device. Everything is stored in your browser's local storage. There is no server, no tracking, no analytics, no cookies.
 
-You can verify this by reading index.html — it's the entire app in one file.
+You can verify this by reading index.html. It's the entire app in one file, commented for your convenience.
 
-## Backup
+## Why no accounts?
+
+There is no server, no database, no login. That means there is
+nothing to hack, nothing to leak, and I personally see no reason to force others to trust me, or anyone else, with their information.
+
+## Backup and data transfer
 
 Use Menu > Download backup to save your tasks as a JSON file.
-
 Use Menu > Restore from backup to load one.
+
+This can also be used to transfer your data between browsers and devices. The easiest way to do this is to email the JSON file to yourself, then download it to the device you need.
