@@ -179,9 +179,7 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g
 // Draws the entire screen: the task list, the legend, the menu, and the edit popup.
 function render(){
   const sorted=[...tasks].sort(urgencySort);
-  const oc=sorted.filter(t=>status(t)==='overdue').length;
-  const sc=sorted.filter(t=>status(t)==='due-soon').length;
-
+  
   let h='<div class="hdr"><h1>Time Radar</h1><div class="hdr-btns">';
   h+='<button class="add-btn" onclick="openAdd()">+ Add</button>';
   h+='<button class="word-btn" onclick="toggleDark()">Dark Mode<br>Toggle</button>';
@@ -194,8 +192,6 @@ function render(){
     h+='</div>';
   }
   h+='</div></div></div>';
-
-  h+='<div class="legend"><div class="legend-item"><span class="dot overdue"></span> Overdue ('+oc+')</div><div class="legend-item"><span class="dot due-soon"></span> Due soon ('+sc+')</div><div class="legend-item"><span class="dot ok"></span> All good</div></div>';
 
   if(!sorted.length)h+='<div class="empty">No tasks yet.<br>Tap "+ Add" to create one.</div>';
   for(const t of sorted){
