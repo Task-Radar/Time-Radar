@@ -146,8 +146,8 @@ function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks))}
 // Checks whether a task is overdue, due soon, or fine based on how long ago you did it.
 function status(t){
   const ratio=(Date.now()-t.lastDone)/(t.freqDays*86400000);
-  if(ratio>=1.15)return'overdue';
-  if(ratio>=0.7)return'due-soon';
+  if(ratio>=2)return'overdue';
+  if(ratio>=1)return'due-soon';
   return'ok';
 }
 
