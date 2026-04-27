@@ -56,6 +56,28 @@ body.dark{
   --shadow:rgba(0,0,0,.3);
   --overlay:rgba(0,0,0,0.55);
 }
+body.parchment{
+  --bg:#f4ead5;
+  --bg-card:#faf3e3;
+  --text:#3b2f1e;
+  --text-mid:#5c4a32;
+  --text-muted:#8a7a5f;
+  --text-faint:#b0a082;
+  --text-footer:#c4b595;
+  --border:#c9b98a;
+  --border-mid:#b5a474;
+  --hover:#efe4cc;
+  --hover-dark:#e8dbc0;
+  --add-bg:#e6dcc3;
+  --add-text:#3b2f1e;
+  --done-text:#4a6620;
+  --done-border:#8a9e5a;
+  --done-hover:#e0e4c8;
+  --input-bg:#faf3e3;
+  --input-focus:#b5a474;
+  --shadow:rgba(60,40,10,.12);
+  --overlay:rgba(40,30,10,0.4);
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;padding:1.25rem 1rem;transition:background .2s,color .2s}
 .wrap{margin:0 auto}
@@ -134,9 +156,9 @@ let showModal=false,editId=null,showMenu=false;
 // Used for the in-app confirmation popup instead of browser popups.
 let confirmMsg=null,confirmCallback=null;
 
-// Checks if you previously chose dark mode and applies it.
-let isDark=localStorage.getItem('timeRadar_dark')==='true';
-if(isDark)document.body.classList.add('dark');
+// Checks theme and applies it.
+let savedTheme=localStorage.getItem('timeRadar_theme')||'light';
+if(savedTheme!=='light')document.body.classList.add(savedTheme);
 
 // Reads your saved tasks from the browser's storage.
 function load(){
@@ -186,7 +208,7 @@ function render(){
 
   let h='<div class="hdr"><h1>Time Radar</h1><div class="hdr-btns">';
   h+='<button class="add-btn" onclick="openAdd()">+ Add</button>';
-  h+='<button class="word-btn" onclick="toggleDark()">Dark Mode<br>Toggle</button>';
+  h+='<button class="word-btn" onclick="toggleTheme()">Theme<br>Toggle</button>';
   h+='<div class="menu-wrap"><button class="word-btn" onclick="toggleMenu(event)">Menu</button>';
   if(showMenu){
     h+='<div class="menu">';
@@ -229,8 +251,15 @@ function toggleMenu(e){e.stopPropagation();showMenu=!showMenu;render()}
 document.addEventListener('click',function(){if(showMenu){showMenu=false;render()}});
 
 // Switches between light and dark mode and remembers your choice.
-function toggleDark(){isDark=!isDark;document.body.classList.toggle('dark');localStorage.setItem('timeRadar_dark',isDark);render()}
-
+function toggleTheme(){
+  const modes=['light','dark','parchment'];
+  let current=localStorage.getItem('timeRadar_theme')||'light';
+  let next=modes[(modes.indexOf(current)+1)%3];
+  document.body.classList.remove('dark','parchment');
+  if(next!=='light')document.body.classList.add(next);
+  localStorage.setItem('timeRadar_theme',next);
+  render();
+}
 // Marks a task as done right now and saves.
 function markDone(id){const t=tasks.find(x=>x.id===id);if(t){t.lastDone=Date.now();save();render()}}
 
